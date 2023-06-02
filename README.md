@@ -15,3 +15,10 @@ MERN stack for project tracking
 4. git checkout -b 0001_MERN_startup_code
 5. git commit -m "0001 MERN startup code"
 6. git remote add origin https://github.com/pandu-witadi/MERN_lms.git
+
+
+# build and running
+1. go to client_react directory
+2. npm run build
+3. go to root directory
+4. npm run server
