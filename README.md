@@ -24,7 +24,7 @@ MERN stack for project tracking
 4. npm run server
 
 
-# 0001_MERN_startup_code
+# 0002_user_auth
 1. accessToken using jsonwebtoken
 2. redux, redux-thunk for react state menagement - [frontend]
 3. Register and Login - route, page, component : all user - [backend & frontend]
