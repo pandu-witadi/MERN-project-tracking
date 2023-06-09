@@ -5,9 +5,10 @@ const path = require('path')
 const mongoose = require('mongoose')
 const logger = require('morgan')
 const cors = require('cors')
-
+const fileUpload = require('express-fileupload')
 
 const connectMongoDB = require('./db/mongodb-conn')
+const { notFound, errorHandler } = require('./middleware/error')
 const CF = require('./config')
 
 
@@ -17,14 +18,13 @@ app.use( cors() )
 app.use( logger('dev') )
 app.use( express.json() )
 app.use( express.urlencoded({ extended: true, limit: "50mb" }))
-
+app.use( fileUpload() )
 
 // Database Connection
 mongoose.Promise = global.Promise
 Promise.resolve(app)
     .then( connectMongoDB() )
     .catch(err => console.error.bind(console, `MongoDB connection error: ${JSON.stringify(err)}`))
-
 
 
 // use: route
@@ -44,5 +44,7 @@ app.get(
     }
 )
 
+app.use(notFound)
+app.use(errorHandler)
 
 module.exports = app

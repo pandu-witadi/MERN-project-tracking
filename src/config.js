@@ -32,7 +32,7 @@ let CF = {
     },
     model : {
         user: {
-            register_state: false,
+            register_state: true,
             automated_active: true
         }
     }
