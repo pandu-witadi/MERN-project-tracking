@@ -73,6 +73,7 @@ const Register = () => {
     }
 
     const  { isLoading, isError, isSuccess, message } = useSelector( (state) => state.auth )
+    
     const handleSubmit = (e) => {
         e.preventDefault()
         if (password !== confirmPassword) {

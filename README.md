@@ -29,3 +29,7 @@ MERN stack for project tracking
 2. redux, redux-thunk for react state menagement - [frontend]
 3. Register and Login - route, page, component : all user - [backend & frontend]
 4. update profile for current user - [backend & frontend]
+
+
+# 0003_project
+1. module project - [backend]

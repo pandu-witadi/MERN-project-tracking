@@ -1,5 +1,6 @@
 //
 //
+'use strict'
 const express = require('express')
 const path = require('path')
 const mongoose = require('mongoose')
@@ -27,19 +28,19 @@ Promise.resolve(app)
     .catch(err => console.error.bind(console, `MongoDB connection error: ${JSON.stringify(err)}`))
 
 
-// use: route
-app.use('/api', require('./route/index') )
-
-// for uploading
-// app.use('/upload', express.static(path.join(__dirname, '..', 'upload')))
-
 //these 3 lines make sure that Angular/VUe/React and express app are coming from the same server
 const frontEndPath = path.join(__dirname, '..', CF.frontEnd.path)
 console.log(frontEndPath)
 app.use( express.static(frontEndPath) )
-app.get(
-    ['/'],
-    function(req, res) {
+
+// for uploading
+// app.use('/upload', express.static(path.join(__dirname, '..', 'upload')))
+
+// use: route
+app.use('/api', require('./route/index') )
+
+// serve client
+app.get( ['/*'], function(req, res) {
         res.sendFile('index.html',  { root: frontEndPath } )
     }
 )

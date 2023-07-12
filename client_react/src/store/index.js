@@ -14,18 +14,20 @@ const middleware = [thunk]
 
 import { settingReducer } from './reducer/setting'
 import { authReducer } from './reducer/auth'
+import { projectReducer } from './reducer/project'
 
 const reducer = combineReducers({
     setting: settingReducer,
     auth: authReducer,
+    project: projectReducer
 })
 
 const mode = JSON.parse( localStorage.getItem('mode') )
-const user = JSON.parse( localStorage.getItem('user') )
+const user = JSON.parse( localStorage.getItem('authUser') )
 const initialState = {
     setting: {
         mode: mode ? mode: 'dark',
-        isProfileOpen: false 
+        isProfileOpen: false
     },
     auth: {
         user: user ? user : null,

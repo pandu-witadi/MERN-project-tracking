@@ -4,9 +4,11 @@
     "description": "",
     "main": "src/index.js",
     "scripts": {
-        "dev": "nodemon src/index.js",
         "client": "npm start --prefix ./client_react",
-        "server": "node src/index.js"
+        "server": "node src/index.js",
+        "dev": "nodemon src/index.js",
+        "data:import": "node src/seeder",
+        "data:destroy": "node src/seeder -d"
     },
     "keywords": [
         "MERN",

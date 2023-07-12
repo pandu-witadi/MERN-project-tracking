@@ -1,6 +1,8 @@
 //
 //
 import axios from 'axios'
+
+import { baseURL } from '../../config'
 import {
     AUTH_RESET,
     AUTH_REQUEST,
@@ -16,11 +18,15 @@ import {
     AUTH_UPDATE_FAIL
 } from '../constant/auth'
 
-import { baseURL } from '../../config'
-
-export const logout = () => async( dispatch ) => dispatch({ type: AUTH_LOGOUT })
 
 export const reset = () => async( dispatch ) => dispatch({ type: AUTH_RESET })
+
+export const logout = () => async( dispatch ) => {
+    localStorage.removeItem('authUser')
+    dispatch({ type: AUTH_LOGOUT })
+    dispatch({ type: AUTH_RESET })
+    // document.location.href = '/login'
+}
 
 export const register = (userData) => async( dispatch ) => {
     try {
@@ -55,6 +61,7 @@ export const login = (userData) => async( dispatch ) => {
             }
         }
         const { data } = await axios.post(baseURL + '/api/auth/login', userData, config)
+        localStorage.setItem( 'authUser', JSON.stringify(data) )
         dispatch({
             type: AUTH_LOGIN_SUCCESS,
             payload: data

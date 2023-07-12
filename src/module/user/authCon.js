@@ -30,7 +30,6 @@ const authRequired = asyncHandler( async(req, res, next) => {
 })
 
 const register = asyncHandler( async (req, res) => {
-    console.log(req.body)
     const { email, password, name, ...otherKeys } = req.body
     if (!email || !password || !name ) {
         res.status(400)
@@ -158,10 +157,24 @@ const update = asyncHandler( async (req, res) => {
     })
 })
 
+const remove = asyncHandler( async (req, res) => {
+    const { email,  ...otherKeys } = req.body
+    if (!email) {
+        res.status(400)
+        throw new Error('Please add all fields')
+    }
+    const user = await User.findOneAndDelete({ email: email})
+    if (!user) {
+        res.status(401)
+        throw new Error('invalid credentials')
+    }
+    return res.status(200).json(user)
+})
 
 module.exports = {
     authRequired,
     register,
     login,
-    update
+    update,
+    remove
 }
