@@ -14,12 +14,37 @@ import {
 import SearchIcon from '@mui/icons-material/Search'
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline"
 
+import axios from 'axios'
+import { baseURL } from '../../config'
+
 
 const Landing = () => {
     const navigate = useNavigate()
 
-    const [searchParam, setSearchParam] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const [isError, setIsError] = useState(false)
 
+    const [projectStat, setProjectStat] = useState({})
+    const fetchProjectStat = async () => {
+        setIsLoading(true)
+        try {
+            const { data } = await axios.get(baseURL + `/api/project/stat`)
+            console.log('data', typeof data, data)
+            setProjectStat(data)
+        } catch (err) {
+            setIsError(err)
+        }
+        setIsLoading(false)
+    }
+
+    useEffect(() => {
+        // console.log('searchQuery' ,searchQuery)
+        fetchProjectStat()
+    }, [])
+
+
+
+    const [searchParam, setSearchParam] = useState('')
     const handleFind = (e) => {
         e.preventDefault()
 
@@ -39,8 +64,10 @@ const Landing = () => {
 
             }
         )
-
     }
+
+
+
     return (
         <>
             <Container>
@@ -63,6 +90,11 @@ const Landing = () => {
                 </Stack>
                 <Divider />
                 <p>Dashboard</p>
+                <p>Project Statistic: </p>
+                <li>
+                    <ul>{JSON.stringify(projectStat)}</ul>
+                    
+                </li>
             </Container>
         </>
     )

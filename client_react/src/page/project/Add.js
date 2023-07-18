@@ -74,7 +74,7 @@ const Add = () => {
     useEffect(() => {
        if (isSuccess) {
            dispatch( reset() )
-           navigate('/project')
+           navigate('/project/list')
        }
        if (isError) {
            setIsAlert(true)

@@ -8,7 +8,10 @@ import {
     PROJECT_REMOVE_FAIL,
 
     PROJECT_CREATE_SUCCESS,
-    PROJECT_CREATE_FAIL
+    PROJECT_CREATE_FAIL,
+
+    PROJECT_UPDATE_SUCCESS,
+    PROJECT_UPDATE_FAIL
 } from '../constant/project'
 
 export const projectReducer = (
@@ -64,6 +67,24 @@ export const projectReducer = (
                 isLoading: false,
                 isError: true,
                 isSuccess: false,
+                data: null,
+                message: action.payload
+            }
+        case PROJECT_UPDATE_SUCCESS:
+            return {
+                ...state,
+                isLoading: false,
+                isError: false,
+                isSuccess: true,
+                data: action.payload,
+                message: null
+            }
+        case PROJECT_UPDATE_FAIL:
+            return {
+                ...state,
+                isLoading: false,
+                isError: false,
+                isSuccess: true,
                 data: null,
                 message: action.payload
             }

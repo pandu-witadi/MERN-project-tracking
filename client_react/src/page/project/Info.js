@@ -30,7 +30,7 @@ import Loader from '../../component/Loader'
 
 import axios from 'axios'
 import { baseURL } from '../../config'
-import { remove } from '../../store/action/project'
+import { remove, update } from '../../store/action/project'
 
 
 import Dialog from '@mui/material/Dialog';
@@ -40,17 +40,14 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
 
-
-
 const Info = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const location = useLocation()
 
     const { mode, searchQuery } = location.state
-
     const { id } = useParams()
-    // console.log('project_id', id)
+    // const { projectId, setProjectId } = useState(id)
 
     const [isLoading, setIsLoading] = useState(false)
     const [isError, setIsError] = useState(false)
@@ -83,16 +80,10 @@ const Info = () => {
 
     useEffect(() => {
         fetchProjectByID(id)
-        console.log(projectData)
         setSelectedPhase(projectData?.phase)
     }, [])
 
-    const handleDelete = async (e) => {
-        e.preventDefault()
-        console.log('delete', projectData._id)
-        // dispatch( remove(projectData._id) )
-        navigate('/project/list')
-    }
+
 
     const handleBackProject = async (e) => {
         e.preventDefault()
@@ -118,13 +109,55 @@ const Info = () => {
     const [selectedPhase, setSelectedPhase] = useState(projectData?.phase)
     const handlePhase = (e) => setSelectedPhase(e.target.value)
 
-    const [open, setOpen] = useState(false);
-    const handleClickOpen = () => {
-        setOpen(true)
+
+    // --- Dialog Delete
+    const handleDelete = async (e) => {
+        e.preventDefault()
+        console.log('delete', projectData._id)
+        dispatch( remove(projectData._id) )
+        navigate('/project/list')
     }
 
-    const handleClose = () => {
-        setOpen(false)
+    const [openDelete, setOpenDelete] = useState(false)
+    const handleOpenDelete = (e) => {
+        e.preventDefault()
+        setOpenDelete(true)
+    }
+
+    const handleCloseDelete = (e) => {
+        e.preventDefault()
+        setOpenDelete(false)
+    }
+
+    // --- Dialog Edit
+    const handleEdit = (e) => {
+        e.preventDefault()
+        // setProjectData({ regID, title, tags, phase, desc})
+        projectData.tags = tags.split(',').map(item => item.trim())
+        console.log(projectData)
+
+        dispatch( update(projectData) )
+            // setOpenEdit(false)
+        const params = {
+            mode: mode,
+            q: searchQuery
+        }
+        navigate(
+            {
+                pathname: '/project/list',
+                search: `?${createSearchParams(params)}`
+            }
+        )
+    }
+    const [openEdit, setOpenEdit] = useState(false)
+    const handleOpenEdit = (e) => {
+        e.preventDefault()
+        setOpenEdit(true)
+    }
+
+    const handleCloseEdit = (e) => {
+        e.preventDefault()
+        setOpenEdit(false)
     }
 
     return (
@@ -142,39 +175,31 @@ const Info = () => {
                         </Link>
                     </Box>
                 </Toolbar>
-                <Typography sx={{ fontSize:'150%', fontWeight: 'bold', mb: 2 }}>Project Info {projectData._id}</Typography>
+                <Typography sx={{ fontSize:'150%', fontWeight: 'bold', mb: 2 }}>Project Info {projectData._id ? projectData._id: ""}</Typography>
 
                 <form>
                     <Grid container spacing={2} sx={{mb: 2}}>
                         <Grid item xs={4}>
-                        <TextField
-                            fullWidth
-                            required
-                            type="text"
+                        <TextField fullWidth required type="text"
                             label='regID'
                             name='regID'
-                            value={projectData?.regID}
-                            InputProps={{
-                                readOnly: true,
-                            }}
+                            value={projectData.regID ? projectData.regID: ""}
+                            InputProps={{ readOnly: true }}
                         />
                         </Grid>
                         <Grid item xs={8}>
-                        <TextField
-                            fullWidth
-                            type="text"
+                        <TextField fullWidth type="text"
                             label='title'
                             name='title'
-                            value={projectData?.title}
+                            value={projectData.title ? projectData.title: ""}
                             onChange={onChange}
                         />
                         </Grid>
                     </Grid>
                     <Box margin="1rem" component="fieldset">
                         <legend>Phase</legend>
-                        <RadioGroup
+                        <RadioGroup row
                             onChange={handlePhase}
-                            row
                             aria-labelledby="demo-row-radio-buttons-group-label"
                             name="row-radio-buttons-group"
                             value={projectData?.phase}
@@ -186,74 +211,89 @@ const Info = () => {
                     </Box>
                     <Grid container spacing={2} sx={{mb: 2}}>
                         <Grid item xs={4}>
-                            <TextField
-                                fullWidth
-                                type="text"
+                            <TextField fullWidth type="text"
                                 placeholder="ex: ML, AI, human resource"
                                 name='tags'
                                 label='tags'
-                                value={projectData?.tags}
+                                value={projectData.tags ? projectData.tags: ""}
                                 onChange={onChange}
                             />
                         </Grid>
                         <Grid item xs={8}>
-                            <TextField
-                                fullWidth
-                                type="text"
+                            <TextField fullWidth type="text"
                                 placeholder="project desc"
                                 name='desc'
                                 label='desc'
-                                value={projectData?.desc}
+                                value={projectData.desc ? projectData.desc: ""}
                                 onChange={onChange}
                             />
                         </Grid>
                     </Grid>
 
                     <Stack margin="2rem" direction="row" alignItems="center" spacing={3}>
-                        <Button
-                            disableElevation
-                            fullWidth
-                            size="large"
+                        <Button disableElevation fullWidth size="small"
                             type="submit"
                             variant="contained"
-                            color="primary">
-                            Edit Project
+                            color="primary"
+                            onClick={handleOpenEdit}
+                        >
+                            Edit
                         </Button>
-                        <Button
-                            disableElevation
-                            fullWidth
-                            size="large"
+                        <Button disableElevation fullWidth size="small"
                             type="submit"
                             variant="contained"
                             color="warning"
-                            onClick={handleClickOpen}
+                            onClick={handleOpenDelete}
                         >
-                            Open dialog
+                            Delete
                         </Button>
 
+
+                        {/* --- Dialog : Delete */}
                         <Dialog
-                            open={open}
-                            onClose={handleClose}
+                            open={openDelete}
+                            onClose={handleCloseDelete}
                             aria-labelledby="alert-dialog-title"
                             aria-describedby="alert-dialog-description"
                         >
                             <DialogTitle id="alert-dialog-title">
-                            {"Use Google's location service?"}
+                                Confirm Delete ?
                             </DialogTitle>
                             <DialogContent>
-                            <DialogContentText id="alert-dialog-description">
-                            Let Google help apps determine location. This means sending anonymous
-                            location data to Google, even when no apps are running.
-                            </DialogContentText>
+                                <DialogContentText id="alert-dialog-description">
+                                    Test
+                                </DialogContentText>
                             </DialogContent>
                             <DialogActions>
-                            <Button onClick={handleClose}>Disagree</Button>
-                            <Button onClick={handleClose} autoFocus>
-                            Agree
-                            </Button>
+                                <Button onClick={handleCloseDelete}>Cancel Delete</Button>
+                                <Button color="warning" onClick={handleDelete} autoFocus>
+                                    Proceed Delete
+                                </Button>
                             </DialogActions>
                         </Dialog>
 
+                        {/* --- Dialog : Edit */}
+                        <Dialog
+                            open={openEdit}
+                            onClose={handleCloseEdit}
+                            aria-labelledby="alert-dialog-title"
+                            aria-describedby="alert-dialog-description"
+                        >
+                            <DialogTitle id="alert-dialog-title">
+                                Confirm Edit ?
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
+                                    Test
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={handleCloseEdit}>Cancel Edit</Button>
+                                <Button color="warning" onClick={handleEdit} autoFocus>
+                                    Proceed Edit
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
 
                     </Stack>
                 </form>

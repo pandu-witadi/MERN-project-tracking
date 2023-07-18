@@ -219,8 +219,8 @@ const statProject = asyncHandler( async (req, res) => {
     const data_phase = await Project.aggregate().sortByCount("phase")
     const data_year = await Project.aggregate().sortByCount("year")
     return res.status(200).json({
-        phase: { ...data_phase },
-        year: { ...data_year }
+        phase:  data_phase,
+        year:  data_year
     })
 })
 
@@ -239,6 +239,36 @@ const infoById = asyncHandler( async (req, res) => {
     }
 })
 
+const update = asyncHandler( async (req, res) => {
+    const id  = req.params.id
+    if (!id) {
+        res.status(400)
+        throw new Error('project id not found')
+    }
+    console.log(id)
+
+    try {
+        const { _id, __v, createdAt, updatedAt, id, ...otherKeys} = req.body
+        console.log(otherKeys)
+
+        const project = await Project.findByIdAndUpdate(req.params.id, otherKeys)
+        if (!project) {
+            res.status(404)
+            throw new Error('project not found')
+        }
+
+        return res.status(200).json(project)
+        // const { regID, ...otherKeys } = req.body
+        //
+        // const updatedProject= await project.save()
+        // return res.status(200).json(updatedProject)
+
+    } catch (err) {
+        res.status(500)
+        throw new Error("Internal Server Error")
+    }
+
+})
 
 module.exports = {
     create,
@@ -246,5 +276,6 @@ module.exports = {
     findProject,
     statProject,
     search,
-    infoById
+    infoById,
+    update
 }
