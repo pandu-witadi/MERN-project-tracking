@@ -51,7 +51,6 @@ const Info = () => {
 
     const [isLoading, setIsLoading] = useState(false)
     const [isError, setIsError] = useState(false)
-
     const [selectedPhase, setSelectedPhase] = useState("")
     const [selectedTags, setSelectedTags] = useState("")
 
@@ -62,8 +61,6 @@ const Info = () => {
        desc: '',
        phase: ''
     })
-
-
     const {
         regID,
         title,
@@ -72,15 +69,10 @@ const Info = () => {
         desc
     } = projectData
 
-    const handlePhase = (e) => setSelectedPhase(e.target.value)
-    const onChangeTags = (e) => setSelectedTags(e.target.value)
-    
-
     const fetchProjectByID = async (param) => {
         setIsLoading(true)
         try {
             const { data } = await axios.get(baseURL + `/api/project/${param}`)
-            setProjectData(data)
             setProjectData(data)
             setSelectedPhase(data.phase)
             setSelectedTags(data.tags.toString())
@@ -92,7 +84,6 @@ const Info = () => {
 
     useEffect(() => {
         fetchProjectByID(id)
-        setSelectedPhase(projectData?.phase)
     }, [])
 
 
@@ -118,8 +109,11 @@ const Info = () => {
        }))
     }
 
+    const onChangeTags = (e) => {
+        setSelectedTags(e.target.value)
+    }
 
-
+    const handlePhase = (e) => setSelectedPhase(e.target.value)
 
     // --- Dialog Delete
     const handleDelete = async (e) => {
@@ -143,11 +137,12 @@ const Info = () => {
     // --- Dialog Edit
     const handleEdit = (e) => {
         e.preventDefault()
+        // setProjectData({ regID, title, tags, phase, desc})
         projectData.tags = selectedTags.split(',').map(item => item.trim())
-        console.log(projectData)
+        // console.log(projectData)
 
         dispatch( update(projectData) )
-            // setOpenEdit(false)
+            setOpenEdit(false)
         const params = {
             mode: mode,
             q: searchQuery

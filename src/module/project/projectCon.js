@@ -251,7 +251,12 @@ const update = asyncHandler( async (req, res) => {
         const { _id, __v, createdAt, updatedAt, id, ...otherKeys} = req.body
         console.log(otherKeys)
 
-        const project = await Project.findByIdAndUpdate(req.params.id, otherKeys)
+        const project = await Project.findByIdAndUpdate(
+            req.params.id,
+            otherKeys,
+            { new: true }
+        )
+        console.log(project)
         if (!project) {
             res.status(404)
             throw new Error('project not found')
