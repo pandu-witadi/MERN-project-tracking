@@ -23,7 +23,9 @@ import {
 
     Collapse,
     Alert,
-    AlertTitle
+    AlertTitle,
+
+    Divider
 } from '@mui/material'
 
 import Loader from '../../component/Loader'
@@ -32,6 +34,7 @@ import axios from 'axios'
 import { baseURL } from '../../config'
 import { remove, update } from '../../store/action/project'
 
+import ActivityItem from '../../component/project/ActivityItem'
 
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -74,13 +77,12 @@ const Info = () => {
 
     const handlePhase = (e) => setSelectedPhase(e.target.value)
     const onChangeTags = (e) => setSelectedTags(e.target.value)
-    
+
 
     const fetchProjectByID = async (param) => {
         setIsLoading(true)
         try {
             const { data } = await axios.get(baseURL + `/api/project/${param}`)
-            setProjectData(data)
             setProjectData(data)
             setSelectedPhase(data.phase)
             setSelectedTags(data.tags.toString())
@@ -90,7 +92,22 @@ const Info = () => {
         setIsLoading(false)
     }
 
+    const [activityList, setActivityList] = useState([])
+    const fetchActivityByProjectId = async () => {
+        setIsLoading(true)
+        try {
+            const { data } = await axios.get(baseURL + `/api/activity/find-all/${id}`)
+            console.log(data)
+            setActivityList(data)
+            console.log('activityList.length', data.length)
+        } catch (err) {
+            setIsError(err)
+        }
+        setIsLoading(false)
+    }
+
     useEffect(() => {
+        fetchActivityByProjectId()
         fetchProjectByID(id)
         setSelectedPhase(projectData?.phase)
     }, [])
@@ -173,7 +190,9 @@ const Info = () => {
     return (
         <>
             { isLoading && <Loader /> }
+
             <Container>
+
                 <Toolbar sx={{mt: 2,  display: 'flex', justifyContent: 'center'}}>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}} >
                         Back to  &nbsp;
@@ -307,6 +326,12 @@ const Info = () => {
 
                     </Stack>
                 </form>
+                <Divider sx={{mt: 1, mb: 1}}/>
+                { activityList &&
+                    activityList.map( (object, i) =>
+                        <ActivityItem key={i} {...{ data: object} } />
+                    )
+                }
             </Container>
         </>
     )

@@ -245,7 +245,6 @@ const update = asyncHandler( async (req, res) => {
         res.status(400)
         throw new Error('project id not found')
     }
-    console.log(id)
 
     try {
         const { _id, __v, createdAt, updatedAt, id, ...otherKeys} = req.body

@@ -2,7 +2,7 @@
 //
 const mongoose = require('mongoose')
 
-const { schemaOption } = require('./modelOption')
+const { schemaOption } = require('../modelOption')
 
 const basicKey = {
     email: {
