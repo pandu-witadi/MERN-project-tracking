@@ -11,8 +11,9 @@ const basicKey = {
         required: true,
         ref: 'Project',
     },
-    userId: {
+    creatorId: {
         type: mongoose.Schema.Types.ObjectId,
+        required: true,
         ref: 'User',
     },
     title: {

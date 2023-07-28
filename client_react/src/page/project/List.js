@@ -16,9 +16,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import Loader from '../../component/Loader'
 import ProjectItem from '../../component/project/ProjectItem'
 
-import axios from 'axios'
-import { baseURL } from '../../config'
-
+import { search } from '../../service/project'
 
 const List = () => {
     // const navigate = useNavigate()
@@ -33,9 +31,9 @@ const List = () => {
     const fetchProjectList = async (param) => {
         setIsLoading(true)
         try {
-            const { data } = await axios.get(baseURL + `/api/project/search${param}`)
-            setProjectList(data.projects)
-            console.log('projectList.length', data.projects.length)
+            const listProject = await search(param)
+            setProjectList(listProject)
+            console.log('listProject.length', listProject.length)
         } catch (err) {
             setIsError(err)
         }

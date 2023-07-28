@@ -66,29 +66,29 @@ export const remove = (id) => async( dispatch ) => {
     }
 }
 
-export const update = (projectData) => async( dispatch ) => {
-    try {
-        dispatch({ type: PROJECT_REQUEST })
-        const config = {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }
-        const { data } = await axios.put(baseURL + `/api/project/${projectData._id}`, projectData, config)
-        console.log(data)
-        dispatch({
-            type: PROJECT_UPDATE_SUCCESS,
-            payload: data
-        })
-    } catch(err) {
-        dispatch({
-            type: PROJECT_UPDATE_FAIL,
-            payload: err.response && err.response.data && err.response.data.message
-                  ? err.response.data.message
-                  : err.message
-        })
-    }
-}
+// export const update = (projectData) => async( dispatch ) => {
+//     try {
+//         dispatch({ type: PROJECT_REQUEST })
+//         const config = {
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             }
+//         }
+//         const { data } = await axios.put(baseURL + `/api/project/${projectData._id}`, projectData, config)
+//         console.log(data)
+//         dispatch({
+//             type: PROJECT_UPDATE_SUCCESS,
+//             payload: data
+//         })
+//     } catch(err) {
+//         dispatch({
+//             type: PROJECT_UPDATE_FAIL,
+//             payload: err.response && err.response.data && err.response.data.message
+//                   ? err.response.data.message
+//                   : err.message
+//         })
+//     }
+// }
 // export const find = (param) => async( dispatch ) => {
 //     try {
 //         dispatch({ type: PROJECT_REQUEST })

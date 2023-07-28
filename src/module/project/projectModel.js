@@ -20,6 +20,11 @@ const financial = {
 }
 
 const basicKey = {
+    creatorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User',
+    },
     regID: {
         type: String,
         required: true,
@@ -28,10 +33,6 @@ const basicKey = {
     title: {
         type: String,
         required: true,
-    },
-    year: {
-        type: Number,
-        default: 1900
     },
     phase: {
         type: String,
@@ -43,6 +44,7 @@ const basicKey = {
         default: []
     },
     financial: financial,
+
 }
 
 const ProjectSchema = new mongoose.Schema(

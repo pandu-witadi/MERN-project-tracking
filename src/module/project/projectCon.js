@@ -64,72 +64,72 @@ const remove = asyncHandler( async (req, res) => {
 
 })
 
-const findProject = asyncHandler( async (req, res) => {
-    try {
-        if ( checkReqQueryEmpty(req.query) ) {
-            const projects = await Project.find().sort({'createAt': -1})
-            return res.status(200).json({
-    			total: projects.length,
-    			page: 1,
-                limit: projects.length,
-    			projects,
-    		})
-        } else {
-            const page = parseInt(req.query.page) - 1 || 0
-    		const limit = parseInt(req.query.limit) || 5
-    		const search = req.query.search || ""
-    		let sort = req.query.sort || "year"
-    		let tags = req.query.tags
-
-    		req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort])
-
-            let sortBy = {}
-    		if (sort[1])
-    			sortBy[sort[0]] = sort[1]
-    		else
-    			sortBy[sort[0]] = "asc"
-
-            let projects = null
-            let total = 0
-            if (tags) {
-    		    const obj = await Project.find({ title: { $regex: search, $options: "i" } })
-            		.where("tags")
-            		.in([...tags.split(",")])
-            		.sort(sortBy)
-            		.skip(page * limit)
-            		.limit(limit)
-                projects = obj
-                const total_obj = await Project.countDocuments({
-        			tags: { $in: [...tags.split(",")] },
-        			title: { $regex: search, $options: "i" },
-        		})
-                total = total_obj
-            } else {
-                const obj = await Project.find({ title: { $regex: search, $options: "i" } })
-            		.sort(sortBy)
-            		.skip(page * limit)
-            		.limit(limit)
-                projects = obj
-                const total_obj = await Project.countDocuments({
-        			title: { $regex: search, $options: "i" },
-        		})
-                total = total_obj
-            }
-
-            return res.status(200).json({
-    			total,
-    			page: page + 1,
-    			limit,
-    			tags: tags,
-    			projects,
-    		})
-        }
-
-    } catch (err) {
-		res.status(500)
-        throw new Error("Internal Server Error")
-	}
-})
+// const findProject = asyncHandler( async (req, res) => {
+//     try {
+//         if ( checkReqQueryEmpty(req.query) ) {
+//             const projects = await Project.find().sort({'createAt': -1})
+//             return res.status(200).json({
+//     			total: projects.length,
+//     			page: 1,
+//                 limit: projects.length,
+//     			projects,
+//     		})
+//         } else {
+//             const page = parseInt(req.query.page) - 1 || 0
+//     		const limit = parseInt(req.query.limit) || 5
+//     		const search = req.query.search || ""
+//     		let sort = req.query.sort || "year"
+//     		let tags = req.query.tags
+//
+//     		req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort])
+//
+//             let sortBy = {}
+//     		if (sort[1])
+//     			sortBy[sort[0]] = sort[1]
+//     		else
+//     			sortBy[sort[0]] = "asc"
+//
+//             let projects = null
+//             let total = 0
+//             if (tags) {
+//     		    const obj = await Project.find({ title: { $regex: search, $options: "i" } })
+//             		.where("tags")
+//             		.in([...tags.split(",")])
+//             		.sort(sortBy)
+//             		.skip(page * limit)
+//             		.limit(limit)
+//                 projects = obj
+//                 const total_obj = await Project.countDocuments({
+//         			tags: { $in: [...tags.split(",")] },
+//         			title: { $regex: search, $options: "i" },
+//         		})
+//                 total = total_obj
+//             } else {
+//                 const obj = await Project.find({ title: { $regex: search, $options: "i" } })
+//             		.sort(sortBy)
+//             		.skip(page * limit)
+//             		.limit(limit)
+//                 projects = obj
+//                 const total_obj = await Project.countDocuments({
+//         			title: { $regex: search, $options: "i" },
+//         		})
+//                 total = total_obj
+//             }
+//
+//             return res.status(200).json({
+//     			total,
+//     			page: page + 1,
+//     			limit,
+//     			tags: tags,
+//     			projects,
+//     		})
+//         }
+//
+//     } catch (err) {
+// 		res.status(500)
+//         throw new Error("Internal Server Error")
+// 	}
+// })
 
 
 const search = asyncHandler( async (req, res) => {
@@ -217,10 +217,8 @@ const search = asyncHandler( async (req, res) => {
 
 const statProject = asyncHandler( async (req, res) => {
     const data_phase = await Project.aggregate().sortByCount("phase")
-    const data_year = await Project.aggregate().sortByCount("year")
     return res.status(200).json({
-        phase:  data_phase,
-        year:  data_year
+        phase:  data_phase
     })
 })
 
@@ -277,7 +275,7 @@ const update = asyncHandler( async (req, res) => {
 module.exports = {
     create,
     remove,
-    findProject,
+    // findProject,
     statProject,
     search,
     infoById,

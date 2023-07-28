@@ -33,6 +33,7 @@ import Loader from '../../component/Loader'
 const Add = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
+    const { user } = useSelector( (state) => state.auth  )
 
     const [isAlert, setIsAlert] = useState(false)
     const [alertMessage, setAlertMessage] = useState('')
@@ -64,6 +65,7 @@ const Add = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault()
+        projectData.creatorId = user._id
         projectData.phase = selectedPhase
         projectData.tags = tags.split(',').map(item => item.trim())
         // projectData.tags = tagsArr.join()

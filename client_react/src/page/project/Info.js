@@ -32,9 +32,12 @@ import Loader from '../../component/Loader'
 
 import axios from 'axios'
 import { baseURL } from '../../config'
-import { remove, update } from '../../store/action/project'
+import { remove } from '../../store/action/project'
 
-import ActivityItem from '../../component/project/ActivityItem'
+import {
+    findById,
+    update
+} from '../../service/project'
 
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -50,7 +53,7 @@ const Info = () => {
 
     const { mode, searchQuery } = location.state
     const { id } = useParams()
-    // const { projectId, setProjectId } = useState(id)
+    console.log('projectId', id)
 
     const [isLoading, setIsLoading] = useState(false)
     const [isError, setIsError] = useState(false)
@@ -75,14 +78,14 @@ const Info = () => {
         desc
     } = projectData
 
-    const handlePhase = (e) => setSelectedPhase(e.target.value)
+    const onChangePhase = (e) => setSelectedPhase(e.target.value)
     const onChangeTags = (e) => setSelectedTags(e.target.value)
 
 
-    const fetchProjectByID = async (param) => {
+    const fetchProjectByID = async (projectId) => {
         setIsLoading(true)
         try {
-            const { data } = await axios.get(baseURL + `/api/project/${param}`)
+            const data  = await findById(projectId)
             setProjectData(data)
             setSelectedPhase(data.phase)
             setSelectedTags(data.tags.toString())
@@ -92,26 +95,10 @@ const Info = () => {
         setIsLoading(false)
     }
 
-    const [activityList, setActivityList] = useState([])
-    const fetchActivityByProjectId = async () => {
-        setIsLoading(true)
-        try {
-            const { data } = await axios.get(baseURL + `/api/activity/find-all/${id}`)
-            console.log(data)
-            setActivityList(data)
-            console.log('activityList.length', data.length)
-        } catch (err) {
-            setIsError(err)
-        }
-        setIsLoading(false)
-    }
-
     useEffect(() => {
-        fetchActivityByProjectId()
         fetchProjectByID(id)
         setSelectedPhase(projectData?.phase)
     }, [])
-
 
 
     const handleBackProject = async (e) => {
@@ -137,7 +124,6 @@ const Info = () => {
 
 
 
-
     // --- Dialog Delete
     const handleDelete = async (e) => {
         e.preventDefault()
@@ -158,24 +144,27 @@ const Info = () => {
     }
 
     // --- Dialog Edit
-    const handleEdit = (e) => {
+    const handleEdit = async (e) => {
         e.preventDefault()
         projectData.tags = selectedTags.split(',').map(item => item.trim())
-        console.log(projectData)
+        projectData.phase = selectedPhase
 
-        dispatch( update(projectData) )
-            // setOpenEdit(false)
-        const params = {
-            mode: mode,
-            q: searchQuery
+        setIsLoading(true)
+        try {
+            const data = await update(id, projectData)
+            // setProjectData(data)
+            // setSelectedPhase(data.phase)
+            // setSelectedTags(data.tags.toString())
+            fetchProjectByID(id)
+            setSelectedPhase(projectData?.phase)
+        } catch (err) {
+            setIsError(err)
         }
-        navigate(
-            {
-                pathname: '/project/list',
-                search: `?${createSearchParams(params)}`
-            }
-        )
+        setIsLoading(false)
+
+        setOpenEdit(false)
     }
+
     const [openEdit, setOpenEdit] = useState(false)
     const handleOpenEdit = (e) => {
         e.preventDefault()
@@ -185,6 +174,13 @@ const Info = () => {
     const handleCloseEdit = (e) => {
         e.preventDefault()
         setOpenEdit(false)
+    }
+
+
+    const handleActivity = async (e) => {
+        e.preventDefault()
+        console.log(projectData._id)
+        navigate(`/activity/${projectData._id}`)
     }
 
     return (
@@ -204,6 +200,17 @@ const Info = () => {
                         </Link>
                     </Box>
                 </Toolbar>
+                <Toolbar sx={{mt: 2,  display: 'flex', justifyContent: 'center'}}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}} >
+                        Go to  &nbsp;
+                        <Link
+                            underline="hover" color="secondary" fontWeight='bold'
+                            onClick={handleActivity}
+                        >
+                            Activity
+                        </Link>
+                    </Box>
+                </Toolbar>
                 <Typography sx={{ fontSize:'150%', fontWeight: 'bold', mb: 2 }}>Project Info {projectData._id ? projectData._id: ""}</Typography>
 
                 <form>
@@ -213,7 +220,7 @@ const Info = () => {
                             label='regID'
                             name='regID'
                             value={projectData.regID ? projectData.regID: ""}
-                            InputProps={{ readOnly: true }}
+                            onChange={onChange}
                         />
                         </Grid>
                         <Grid item xs={8}>
@@ -228,7 +235,7 @@ const Info = () => {
                     <Box margin="1rem" component="fieldset">
                         <legend>Phase</legend>
                         <RadioGroup row
-                            onChange={handlePhase}
+                            onChange={onChangePhase}
                             aria-labelledby="demo-row-radio-buttons-group-label"
                             name="row-radio-buttons-group"
                             value={selectedPhase}
@@ -326,12 +333,7 @@ const Info = () => {
 
                     </Stack>
                 </form>
-                <Divider sx={{mt: 1, mb: 1}}/>
-                { activityList &&
-                    activityList.map( (object, i) =>
-                        <ActivityItem key={i} {...{ data: object} } />
-                    )
-                }
+
             </Container>
         </>
     )
