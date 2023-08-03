@@ -34,7 +34,7 @@ console.log(frontEndPath)
 app.use( express.static(frontEndPath) )
 
 // for uploading
-// app.use('/upload', express.static(path.join(__dirname, '..', 'upload')))
+app.use('/upload', express.static(path.join(__dirname, '..', 'upload')))
 
 // use: route
 app.use('/api', require('./route/index') )

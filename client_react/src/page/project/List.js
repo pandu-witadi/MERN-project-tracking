@@ -60,10 +60,7 @@ const List = () => {
         fetchProjectList(`?${createSearchParams(params)}`)
     }
 
-
     const [searchParam, setSearchParam] = useState(location.search)
-    // const testState = location.state
-    // console.log(testState)
 
     useEffect(() => {
         // console.log('searchQuery' ,searchQuery)

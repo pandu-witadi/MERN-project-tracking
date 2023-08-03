@@ -5,9 +5,9 @@ import { useParams, useNavigate, useLocation, createSearchParams } from 'react-r
 import { useDispatch, useSelector } from 'react-redux'
 import {
     Container,
-    Toolbar,
+
     Box,
-    Link,
+
     Tabs,
     Tab,
     Typography,
@@ -51,9 +51,9 @@ const Info = () => {
     const dispatch = useDispatch()
     const location = useLocation()
 
-    const { mode, searchQuery } = location.state
-    const { id } = useParams()
-    console.log('projectId', id)
+    // const { mode, searchQuery } = location.state
+    const { projectId } = useParams()
+    console.log('Info', projectId)
 
     const [isLoading, setIsLoading] = useState(false)
     const [isError, setIsError] = useState(false)
@@ -96,32 +96,17 @@ const Info = () => {
     }
 
     useEffect(() => {
-        fetchProjectByID(id)
+        fetchProjectByID(projectId)
         setSelectedPhase(projectData?.phase)
     }, [])
 
-
-    const handleBackProject = async (e) => {
-        e.preventDefault()
-        const params = {
-            mode: mode,
-            q: searchQuery
-        }
-        navigate(
-            {
-                pathname: '/project/list',
-                search: `?${createSearchParams(params)}`
-            }
-        )
-    }
-
     const onChange = (e) => {
-       setProjectData((prevState) => ({
+        e.preventDefault()
+        setProjectData((prevState) => ({
            ...prevState,
            [e.target.name]: e.target.value
-       }))
+        }))
     }
-
 
 
     // --- Dialog Delete
@@ -151,11 +136,11 @@ const Info = () => {
 
         setIsLoading(true)
         try {
-            const data = await update(id, projectData)
+            const data = await update(projectId, projectData)
             // setProjectData(data)
             // setSelectedPhase(data.phase)
             // setSelectedTags(data.tags.toString())
-            fetchProjectByID(id)
+            fetchProjectByID(projectId)
             setSelectedPhase(projectData?.phase)
         } catch (err) {
             setIsError(err)
@@ -176,41 +161,11 @@ const Info = () => {
         setOpenEdit(false)
     }
 
-
-    const handleActivity = async (e) => {
-        e.preventDefault()
-        console.log(projectData._id)
-        navigate(`/activity/${projectData._id}`)
-    }
-
     return (
         <>
             { isLoading && <Loader /> }
 
             <Container>
-
-                <Toolbar sx={{mt: 2,  display: 'flex', justifyContent: 'center'}}>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}} >
-                        Back to  &nbsp;
-                        <Link
-                            underline="hover" color="secondary" fontWeight='bold'
-                            onClick={handleBackProject}
-                        >
-                            Project
-                        </Link>
-                    </Box>
-                </Toolbar>
-                <Toolbar sx={{mt: 2,  display: 'flex', justifyContent: 'center'}}>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}} >
-                        Go to  &nbsp;
-                        <Link
-                            underline="hover" color="secondary" fontWeight='bold'
-                            onClick={handleActivity}
-                        >
-                            Activity
-                        </Link>
-                    </Box>
-                </Toolbar>
                 <Typography sx={{ fontSize:'150%', fontWeight: 'bold', mb: 2 }}>Project Info {projectData._id ? projectData._id: ""}</Typography>
 
                 <form>
@@ -220,7 +175,7 @@ const Info = () => {
                             label='regID'
                             name='regID'
                             value={projectData.regID ? projectData.regID: ""}
-                            onChange={onChange}
+                            onChange={(e) => onChange(e)}
                         />
                         </Grid>
                         <Grid item xs={8}>
@@ -330,10 +285,8 @@ const Info = () => {
                                 </Button>
                             </DialogActions>
                         </Dialog>
-
                     </Stack>
                 </form>
-
             </Container>
         </>
     )

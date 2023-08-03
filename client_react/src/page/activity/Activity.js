@@ -1,10 +1,15 @@
 //
 //
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import moment from 'moment'
 
-import { Grid } from '@mui/material'
+import {
+    Grid,
+    Divider,
+
+} from '@mui/material'
 
 import {
     findAll,
@@ -12,13 +17,20 @@ import {
     update,
     remove
 } from '../../service/activity'
-
 import ActivityPhase from '../../component/activity/ActivityPhase'
 import DialogActivityEdit from '../../component/activity/DialogActivityEdit'
 import DialogActivityDelete from '../../component/activity/DialogActivityDelete'
 
+import {
+    findAllMessage,
+    createMessage
+} from '../../service/message'
+import MessageList from '../../component/message/MessageList'
+
 
 const Activity = () => {
+    const navigate = useNavigate()
+
     const { projectId } = useParams()
     const { user } = useSelector( (state) => state.auth  )
 
@@ -38,7 +50,6 @@ const Activity = () => {
         try {
             const data = await findAll(projectId)
             setActivityList(data)
-            console.log('activityList.length', data.length)
         } catch (err) {
             setIsError(err)
         }
@@ -116,13 +127,6 @@ const Activity = () => {
         setOpenDialogActivityDelete(true)
     }
 
-
-    const onActionMessage = (item) => {
-       console.log("action message clicked")
-    }
-
-
-
     // --- Delete
     const [openDialogActivityDelete, setOpenDialogActivityDelete] = useState(false)
     const [dataDialogActivityDelete, setDataDialogActivityDelete] = useState({data: {}})
@@ -140,46 +144,114 @@ const Activity = () => {
    }
 
 
+    //----------- MESSAGE ----------------------------
+    const [messageList, setMessageList] = useState([])
+    const [activity, setActivity] = useState(null)
+
+    const fetchMessage = async (projectId, activityId) => {
+        setIsLoading(true)
+        try {
+            const data = await findAllMessage(projectId, activityId)
+            setMessageList(data)
+        } catch (err) {
+            setIsError(err)
+        }
+        setIsLoading(false)
+    }
+    const [showChat, setShowChat] = useState(false)
+    const showChatOnClick = () => setShowChat(!showChat)
+    const onActionMessage = (item) => {
+        setActivity(item)
+        fetchMessage(projectId, item._id)
+        setShowChat(true)
+    }
+
+
+const sendMessage = async (projectId, activityId, msg) => {
+        // console.log('sendMessage', projectId, activityId, msg)
+        setIsLoading(true)
+        try {
+            const { data } = await createMessage(projectId, activityId, msg)
+
+        } catch (err) {
+            setIsError(err)
+        }
+        setIsLoading(false)
+        fetchMessage(projectId, activityId)
+    }
+
+    const onSendMessage = (msg) => {
+        if (msg.msg === "")
+            return
+
+        let new_msg = {
+            creatorId: user._id,
+            ...msg
+        }
+        console.log(new_msg)
+        sendMessage(projectId, msg.activityId, new_msg)
+    }
+
+
+
+
     return (
         <>
-            <h3>Activity {projectId}</h3>
-            <Grid container spacing={1}>
-                <Grid item sx={styles.gridItem}>
+            <h3>project activity : {projectId}</h3>
 
-                    <ActivityPhase {...{
-                         phase: { keyId: "planning", title: "Planning" },
-                         data: activityList.filter((item) => item["phase"] === "planning"),
-                         action: {
-                              onActionAdd: onActionAdd,
-                              onActionEdit: onActionEdit,
-                              onActionDelete: onActionDelete,
-                              onActionMessage: onActionMessage
-                         }
-                    }} />
+            <Grid container>
+                <Grid item xs={7.2}>
+                    <Grid container spacing={1}>
+                    <Grid item sx={styles.gridItem}>
+
+                        <ActivityPhase {...{
+                             phase: { keyId: "planning", title: "Planning" },
+                             data: activityList.filter((item) => item["phase"] === "planning"),
+                             action: {
+                                  onActionAdd: onActionAdd,
+                                  onActionEdit: onActionEdit,
+                                  onActionDelete: onActionDelete,
+                                  onActionMessage: onActionMessage
+                             }
+                        }} />
+                    </Grid>
+                    <Grid item sx={styles.gridItem}>
+                        <ActivityPhase {...{
+                            phase: { keyId: "ongoing", title: "Ongoing" },
+                             data: activityList.filter((item) => item["phase"] === "ongoing"),
+                             action: {
+                                 onActionAdd: onActionAdd,
+                                 onActionEdit: onActionEdit,
+                                 onActionDelete: onActionDelete,
+                                 onActionMessage: onActionMessage
+                             }
+                        }} />
+                    </Grid>
+                    <Grid item sx={styles.gridItem}>
+                        <ActivityPhase {...{
+                            phase: { keyId: "done", title: "Done" },
+                             data: activityList.filter((item) => item["phase"] === "done"),
+                             action: {
+                                 onActionAdd: onActionAdd,
+                                 onActionEdit: onActionEdit,
+                                 onActionDelete: onActionDelete,
+                                 onActionMessage: onActionMessage
+                             }
+                        }} />
+                    </Grid>
+                    </Grid>
                 </Grid>
-                <Grid item sx={styles.gridItem}>
-                    <ActivityPhase {...{
-                        phase: { keyId: "ongoing", title: "Ongoing" },
-                         data: activityList.filter((item) => item["phase"] === "ongoing"),
-                         action: {
-                             onActionAdd: onActionAdd,
-                             onActionEdit: onActionEdit,
-                             onActionDelete: onActionDelete,
-                             onActionMessage: onActionMessage
-                         }
-                    }} />
-                </Grid>
-                <Grid item sx={styles.gridItem}>
-                    <ActivityPhase {...{
-                        phase: { keyId: "done", title: "Done" },
-                         data: activityList.filter((item) => item["phase"] === "done"),
-                         action: {
-                             onActionAdd: onActionAdd,
-                             onActionEdit: onActionEdit,
-                             onActionDelete: onActionDelete,
-                             onActionMessage: onActionMessage
-                         }
-                    }} />
+
+                <Grid item xs={4.8}>
+                    { showChat &&
+                        <MessageList
+                            data={messageList}
+                            currentUser={user}
+                            onCloseMessage={()=> setShowChat(false)}
+                            onSendMessage={onSendMessage}
+                            activity={activity}
+                        />
+                    }
                 </Grid>
             </Grid>
 

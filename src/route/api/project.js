@@ -5,11 +5,13 @@ const router = require('express').Router()
 const projectCon = require('../../module/project/projectCon')
 
 router.post('/create', projectCon.create)
-router.delete('/:id', projectCon.remove)
-router.put('/:id', projectCon.update)
-// router.get('/find', projectCon.findProject)
+router.delete('/:projectId', projectCon.remove)
+router.put('/:projectId', projectCon.update)
+
 router.get('/search', projectCon.search)
-router.get('/stat', projectCon.statProject)
-router.get('/:id', projectCon.infoById)
+
+router.get('/stat/all', projectCon.statAll)
+router.get('/stat/:projectId', projectCon.statById)
+router.get('/:projectId', projectCon.infoById)
 
 module.exports = router

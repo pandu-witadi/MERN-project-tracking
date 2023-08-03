@@ -3,12 +3,16 @@
 const asyncHandler = require('express-async-handler')
 const Project = require('./projectModel')
 
+const Activity = require('../activity/activityModel')
+const Message = require('../message/messageModel')
+const Note = require('../note/noteModel')
+
 // utility ---------------------------------------------------------------------
 const checkReqQueryEmpty = (q) => {
     return (Object.keys(q).length === 0 && q.constructor === Object)
 }
 
-const findProjectAll = asyncHandler( async (req, res) => {
+const findAll = asyncHandler( async (req, res) => {
     try {
         const projects = await Project.find().sort({'updatedAt': -1})
         return res.status(200).json({
@@ -23,6 +27,28 @@ const findProjectAll = asyncHandler( async (req, res) => {
     }
 })
 
+const statAll = asyncHandler( async (req, res) => {
+    const data_phase = await Project.aggregate().sortByCount("phase")
+    return res.status(200).json({
+        phase:  data_phase
+    })
+})
+
+const statById = asyncHandler( async (req, res) => {
+    const projectId  = req.params.projectId
+    if (!projectId) {
+        res.status(400)
+        throw new Error('project id not found')
+    }
+    const listActivity = await Activity.aggregate({ projectId: projectId }).sortByCount("phase")
+    const listMessage = await Message.aggregate({ projectId: projectId }).sortByCount("mode")
+    const listNote = await Note.aggregate({ projectId: projectId }).sortByCount("mode")
+    return res.status(200).json({
+        activity: listActivity,
+        message: listMessage,
+        note: listNote
+    })
+})
 
 // -----------------------------------------------------------------------------
 const create = asyncHandler( async (req, res) => {
@@ -47,89 +73,19 @@ const create = asyncHandler( async (req, res) => {
 })
 
 const remove = asyncHandler( async (req, res) => {
-    const id  = req.params.id
-    if (!id) {
+    const projectId  = req.params.projectId
+    if (!projectId) {
         res.status(400)
         throw new Error('project id not found')
     }
-    console.log(id)
-    const project = await Project.findOneAndDelete({ _id: id})
+    // console.log(id)
+    const project = await Project.findOneAndDelete({ _id: projectId})
     if (!project) {
         res.status(404)
         throw new Error('project not found')
     }
-    console.log(project)
-    // await project.remove()
     return res.status(200).json(project)
-
 })
-
-// const findProject = asyncHandler( async (req, res) => {
-//     try {
-//         if ( checkReqQueryEmpty(req.query) ) {
-//             const projects = await Project.find().sort({'createAt': -1})
-//             return res.status(200).json({
-//     			total: projects.length,
-//     			page: 1,
-//                 limit: projects.length,
-//     			projects,
-//     		})
-//         } else {
-//             const page = parseInt(req.query.page) - 1 || 0
-//     		const limit = parseInt(req.query.limit) || 5
-//     		const search = req.query.search || ""
-//     		let sort = req.query.sort || "year"
-//     		let tags = req.query.tags
-//
-//     		req.query.sort ? (sort = req.query.sort.split(",")) : (sort = [sort])
-//
-//             let sortBy = {}
-//     		if (sort[1])
-//     			sortBy[sort[0]] = sort[1]
-//     		else
-//     			sortBy[sort[0]] = "asc"
-//
-//             let projects = null
-//             let total = 0
-//             if (tags) {
-//     		    const obj = await Project.find({ title: { $regex: search, $options: "i" } })
-//             		.where("tags")
-//             		.in([...tags.split(",")])
-//             		.sort(sortBy)
-//             		.skip(page * limit)
-//             		.limit(limit)
-//                 projects = obj
-//                 const total_obj = await Project.countDocuments({
-//         			tags: { $in: [...tags.split(",")] },
-//         			title: { $regex: search, $options: "i" },
-//         		})
-//                 total = total_obj
-//             } else {
-//                 const obj = await Project.find({ title: { $regex: search, $options: "i" } })
-//             		.sort(sortBy)
-//             		.skip(page * limit)
-//             		.limit(limit)
-//                 projects = obj
-//                 const total_obj = await Project.countDocuments({
-//         			title: { $regex: search, $options: "i" },
-//         		})
-//                 total = total_obj
-//             }
-//
-//             return res.status(200).json({
-//     			total,
-//     			page: page + 1,
-//     			limit,
-//     			tags: tags,
-//     			projects,
-//     		})
-//         }
-//
-//     } catch (err) {
-// 		res.status(500)
-//         throw new Error("Internal Server Error")
-// 	}
-// })
 
 
 const search = asyncHandler( async (req, res) => {
@@ -141,16 +97,16 @@ const search = asyncHandler( async (req, res) => {
 
     try {
         if ( checkReqQueryEmpty(req.query) )
-            return findProjectAll(req, res)
+            return findAll(req, res)
 
         if ( !req.query.mode ) {
             console.log('!req.query.mode')
-            return findProjectAll(req, res)
+            return findAll(req, res)
         }
 
         if ( !listMode.includes(req.query.mode) ) {
             console.log( "!listMode.includes(req.query.mode", !listMode.includes(req.query.mode))
-            return findProjectAll(req, res)
+            return findAll(req, res)
         }
 
 
@@ -159,7 +115,7 @@ const search = asyncHandler( async (req, res) => {
 
         if (req.query.mode === 'titleRegID') {
             if (!req.query.q)
-                return findProjectAll(req, res)
+                return findAll(req, res)
 
             const listSearch = req.query.q ? [ ...req.query.q.split(",") ] : []
             const regex = listSearch.join("|")
@@ -182,7 +138,7 @@ const search = asyncHandler( async (req, res) => {
             })
         } else if (req.query.mode === 'tags') {
             if (!req.query.q)
-                return findProjectAll(req, res)
+                return findAll(req, res)
 
             const tag = req.query.q ?  req.query.q : ''
             const projects = await Project.find (
@@ -198,7 +154,7 @@ const search = asyncHandler( async (req, res) => {
             })
         } else if (req.query.mode === 'phase') {
             if (!req.query.q)
-                return findProjectAll(req, res)
+                return findAll(req, res)
 
             const projects = await Project.find ({ phase: req.query.q }).sort({'updatedAt': -1})
             return res.status(200).json({
@@ -215,16 +171,11 @@ const search = asyncHandler( async (req, res) => {
 })
 
 
-const statProject = asyncHandler( async (req, res) => {
-    const data_phase = await Project.aggregate().sortByCount("phase")
-    return res.status(200).json({
-        phase:  data_phase
-    })
-})
+
 
 const infoById = asyncHandler( async (req, res) => {
     try {
-        const project = await Project.findById(req.params.id)
+        const project = await Project.findById(req.params.projectId)
         if (project) {
             return res.json(project)
         } else {
@@ -238,33 +189,27 @@ const infoById = asyncHandler( async (req, res) => {
 })
 
 const update = asyncHandler( async (req, res) => {
-    const id  = req.params.id
-    if (!id) {
+    const projectId  = req.params.projectId
+    if (!projectId) {
         res.status(400)
         throw new Error('project id not found')
     }
 
     try {
-        const { _id, __v, createdAt, updatedAt, id, ...otherKeys} = req.body
+        const { _id, __v, createdAt, updatedAt, ...otherKeys} = req.body
         console.log(otherKeys)
 
         const project = await Project.findByIdAndUpdate(
-            req.params.id,
+            projectId,
             otherKeys,
             { new: true }
         )
-        console.log(project)
         if (!project) {
             res.status(404)
             throw new Error('project not found')
         }
 
         return res.status(200).json(project)
-        // const { regID, ...otherKeys } = req.body
-        //
-        // const updatedProject= await project.save()
-        // return res.status(200).json(updatedProject)
-
     } catch (err) {
         res.status(500)
         throw new Error("Internal Server Error")
@@ -276,7 +221,8 @@ module.exports = {
     create,
     remove,
     // findProject,
-    statProject,
+    statAll,
+    statById,
     search,
     infoById,
     update

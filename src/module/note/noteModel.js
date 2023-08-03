@@ -16,21 +16,21 @@ const basicKey = {
         required: true,
         ref: 'User',
     },
-    activityId: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Activity',
+    title: String,
+    content: String,
+    favorited: {
+        type: Boolean,
+        default: false    
     },
-    msg: String,
     mode: {
         type: Number,
         default: 0
     }
 }
 
-const MessageSchema = new mongoose.Schema(
+const NoteSchema = new mongoose.Schema(
     { ...basicKey },
-    { ...schemaOption, collection: 'message' }
+    { ...schemaOption, collection: 'note' }
 )
 
-module.exports = mongoose.model('Message', MessageSchema)
+module.exports = mongoose.model('Note', NoteSchema)

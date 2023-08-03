@@ -11,7 +11,7 @@ import {
 } from '@mui/material'
 
 import NavBar from '../component/navbar/NavBar'
-import { stat } from '../service/project'
+import { statAll } from '../service/project'
 
 
 const Home = () => {
@@ -31,7 +31,7 @@ const Home = () => {
     const fetchProjectStat = async () => {
         setIsLoading(true)
         try {
-            const data = await stat()
+            const data = await statAll()
             setProjectStat(data)
         } catch (err) {
             setIsError(err)

@@ -23,6 +23,7 @@ import { Add as ProjectAdd } from './page/project/Add'
 import { Info as ProjectInfo } from './page/project/Info'
 
 import { Activity as ProjectActivity } from './page/activity/Activity'
+import { Note as ProjectNote } from './page/note/Note'
 
 const App = () => {
     const mode = useSelector((state) => state.setting.mode)
@@ -42,9 +43,11 @@ const App = () => {
                         <Route path="/project" element={<ProjectLanding />} />
                         <Route path="/project/list" element={<ProjectList />} />
                         <Route path="/project/add" element={<ProjectAdd />} />
-                        <Route path="/project/:id" element={<ProjectInfo />} />
+                        <Route path="/project/:projectId" element={<ProjectLanding />} />
+                        <Route path="/project/info/:projectId" element={<ProjectInfo />} />
 
                         <Route path="/activity/:projectId" element={<ProjectActivity />} />
+                        <Route path="/note/:projectId" element={<ProjectNote />} />
 
                     </Routes>
                 </ThemeProvider>

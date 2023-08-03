@@ -4,12 +4,18 @@ import axios from 'axios'
 
 import { baseURL } from '../config'
 
-const stat = async () => {
-    const { data } = await axios.get(baseURL + `/api/project/stat`)
+const statAll = async () => {
+    const { data } = await axios.get(baseURL + `/api/project/stat/all`)
+    return data
+}
+
+const statById = async (projectId) => {
+    const data = await axios.get(baseURL + `/api/project/stat/${projectId}`)
     return data
 }
 
 const search = async( param ) => {
+    console.log(param)
     const { data } = await axios.get(baseURL + `/api/project/search${param}`)
     return data.projects
 }
@@ -31,8 +37,9 @@ const update = async( projectId, projectData ) => {
 
 
 export {
+    statAll,
+    statById,
     search,
     findById,
-    update,
-    stat
+    update
 }

@@ -1,25 +1,24 @@
 //
 //
 import { useState, useEffect } from 'react'
-import { useNavigate, createSearchParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import {
     Container,
     Toolbar,
-    Divider,
+    Box,
     Stack,
-    TextField,
-    Button,
-    Typography
+    Link,
+    Divider
 } from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search'
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline"
 
-import axios from 'axios'
-import { baseURL } from '../../config'
-
+import {
+    statById
+} from '../../service/project'
 
 const Landing = () => {
     const navigate = useNavigate()
+    const { projectId } = useParams()
+    console.log('Landing', projectId)
 
     const [isLoading, setIsLoading] = useState(false)
     const [isError, setIsError] = useState(false)
@@ -28,8 +27,8 @@ const Landing = () => {
     const fetchProjectStat = async () => {
         setIsLoading(true)
         try {
-            const { data } = await axios.get(baseURL + `/api/project/stat`)
-            console.log('data', typeof data, data)
+            const { data } = await statById(projectId)
+            console.log('data', data)
             setProjectStat(data)
         } catch (err) {
             setIsError(err)
@@ -38,63 +37,59 @@ const Landing = () => {
     }
 
     useEffect(() => {
-        // console.log('searchQuery' ,searchQuery)
-        fetchProjectStat()
-    }, [])
+        fetchProjectStat(projectId)
+    }, [projectId])
 
-
-
-    const [searchParam, setSearchParam] = useState('')
-    const handleFind = (e) => {
+    const goInfo = async (e) => {
         e.preventDefault()
-
-        const params = {
-            mode: 'titleRegID',
-            q: searchParam
-        }
-        navigate(
-            {
-                pathname: '/project/list',
-                search: `?${createSearchParams(params)}`,
-            },
-            {
-                state: {
-                    test: 'test'
-                }
-
-            }
-        )
+        navigate(`/project/info/${projectId}`)
     }
 
+    const goActivity = async (e) => {
+        e.preventDefault()
+        navigate(`/activity/${projectId}`)
+    }
 
+    const goNote = async (e) => {
+        e.preventDefault()
+        navigate(`/note/${projectId}`)
+    }
 
     return (
         <>
             <Container>
-                <Toolbar sx={{mt: 2}}/>
-                <Stack direction="row" alignItems="center" spacing={0}>
-                    <TextField
-                        name='query'
-                        fullWidth size={'small'}
-                        value={searchParam}
-                        onChange={(e) => setSearchParam(e.target.value)}
-                        onKeyPress={(e) => {
-                            if (e.key === 'Enter')
-                                handleFind(e)
-                        }}
-                        label={'Find a project ...'}
-                        sx={{ width: '100%', marginRight: "10px" }}
-
-                    />
-                    <SearchIcon sx={{ "&:hover": { color: "blue" } }} onClick={handleFind}/>
+            <p>Project Statistic: </p>
+            <pre>{JSON.stringify(projectStat)}</pre>
+            <Divider />
+                <Stack spacing={2}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}} >
+                        Go to  &nbsp;
+                        <Link
+                            underline="hover" color="secondary" fontWeight='bold'
+                            onClick={goInfo}
+                        >
+                            Info
+                        </Link>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}} >
+                        Go to  &nbsp;
+                        <Link
+                            underline="hover" color="secondary" fontWeight='bold'
+                            onClick={goActivity}
+                        >
+                            Activity
+                        </Link>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}} >
+                        Go to  &nbsp;
+                        <Link
+                            underline="hover" color="secondary" fontWeight='bold'
+                            onClick={goNote}
+                        >
+                            Note
+                        </Link>
+                    </Box>
                 </Stack>
-                <Divider />
-                <p>Dashboard</p>
-                <p>Project Statistic: </p>
-                <li>
-                    <ul>{JSON.stringify(projectStat)}</ul>
-                    
-                </li>
             </Container>
         </>
     )
