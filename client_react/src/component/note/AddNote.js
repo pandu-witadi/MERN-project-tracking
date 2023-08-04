@@ -53,7 +53,7 @@ const AddNote = ({ projectId, userId, onSubmit }) => {
         }
         const data = await create(projectId, item)
         setLoadingButton(false)
-        const addedNote = data.note
+        const addedNote = data
 
         onSubmit(addedNote)
         setNoteContent("")

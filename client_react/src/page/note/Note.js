@@ -132,7 +132,9 @@ const Note = () => {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <AddNote projectId={projectId} userId={user._id} onSubmit={onSubmit} />
+                <>
+                    <AddNote projectId={projectId} userId={user._id} onSubmit={onSubmit} />
+                </>    
             </Modal>
             <Fab
                 sx={{ m: 2 }}
